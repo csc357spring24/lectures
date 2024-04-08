@@ -1,12 +1,6 @@
-#include <stdio.h>
-
-int main(void) {
-    printf("add(1, 2): %d\n", add(1, 2));
-
-    return 0;
-}
-
+/* To define a function that takes two ints and returns a third int: */
 int add(int x, int y) {
+    /* The beginning of a function is a valid place to define locals: */
     int z = x + y;
 
     return z;
