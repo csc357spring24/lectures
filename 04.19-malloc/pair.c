@@ -18,6 +18,16 @@ int main(void) {
      *  deallocated: */
     free(arr);
 
+    /* Freeing something that has already been deallocated is an error:
+     * free(arr);
+     * free(arr); */
+
+    /* Freeing something that is inside a block is an error:
+     * free(arr + 1); */
+
+    /* Freeing something that isn't even on the heap is an error:
+     * free(&arr); */
+
     return 0;
 }
 
