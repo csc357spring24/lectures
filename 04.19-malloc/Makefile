@@ -5,4 +5,4 @@ pair.o: pair.c
 	gcc -Wall -Wextra -Werror -ansi -pedantic -c pair.c
 
 debug: pair.c
-	gcc -Wall -Wextra -Werror -ansi -pedantic -g pair.c
+	gcc -Wall -Wextra -ansi -pedantic -g pair.c
