@@ -1,4 +1,4 @@
-/* To define a structure containing two ints. :*/
+/* To define a type named "struct Pair" containing two integers: */
 struct Pair {
     int first;
     int second;

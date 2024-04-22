@@ -2,8 +2,8 @@
 #include "pair.h"
 
 /* In C, everything is pass-by-value, and the value of a structure is the whole
- *  structure. If we want changes made inside a function to be communicated
- *  back to the caller, we need to return the whole structure: */
+ *  structure. If a function intends to modify a given structure, then it must
+ *  return the resulting structure: */
 Pair foo(Pair pair) {
     pair.first = 5;
 
