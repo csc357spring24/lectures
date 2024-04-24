@@ -5,6 +5,9 @@
 List *lstcreate() {
     List *lst = (List *)malloc(sizeof(List));
 
+    /* Memory dynamically allocated with malloc is not automatically zeroed
+     *  out; if we want zeroes there, we should put zeroes there: */
+
     lst->head = NULL;
     lst->size = 0;
 
@@ -13,11 +16,10 @@ List *lstcreate() {
 
 /* lstdestroy: Destroys an existing linked list. */
 void lstdestroy(List *lst) {
-
-    /* NOTE: Freeing the List only frees the List; it does not free any of the
-     *       Nodes contained within. Additionally, the Nodes have to be freed
-     *       (or we have to save a pointer to the head) before we free the List
-     *       otherwise we'll lose the pointer that enables us to access them. */
+    /* Freeing the List only frees the List; it does not free any of the Nodes
+     *  contained within. Additionally, the Nodes have to be freed (or we have
+     *  to save a pointer to the head) before we free the List otherwise we'll
+     *  lose the pointer that enables us to access them. */
 
     Node *node = lst->head;
 
@@ -27,9 +29,9 @@ void lstdestroy(List *lst) {
         node = next;
     }
 
-    /* NOTE: There is no need to set any of the head or next pointers back to
-     *       NULL; the list is being deallocated, so we shouldn't need to care
-     *       what its memory contains. */
+    /* There is no need to set any of the head or next pointers back to NULL;
+     *  the list is being deallocated, so we shouldn't need to care what its
+     *  memory contains. */
 
     free(lst);
 }
@@ -68,8 +70,9 @@ int lstadd(List *lst, int idx, void *val) {
 
     lst->size++;
 
-    /* If we wanted to check for, for example, invalid indices, we could then
-     *  return something other than 0 to indicate an error. */
+    /* If we wanted to check for, for example, out-of-bounds indices, we could
+     *  then return something other than 0 to indicate an error. */
+
     return 0;
 }
 
