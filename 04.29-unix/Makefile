@@ -1,4 +1,7 @@
-CFLAGS = -Wall -Wextra -Werror -ansi -pedantic
+# Now that we know what we are doing, we can feel free to ignore any warnings
+#  and switch to the latest version of the C standard with all of the extra
+#  GNU extensions:
+CFLAGS = -Wall -Wextra -std=gnu11 -pedantic
 
 all: copy fcopy
 
