@@ -49,11 +49,11 @@ int main(int argc, char* argv[]) {
 
 unsigned char stob(char *bits) {
     unsigned char byte = 0, mask;
-    
-    /* Note that bits will be a string, e.g., "00100001", where the character
-     *  at index 0 corresponds to the MSB of the byte. */
 
-    for (mask = 0x80; mask > 0x00; mask >>= 1) {
+    /* Note that the string will be of the form "00100001", with the character
+     *  at index 0 being the MSB of the byte we're packing. */
+
+    for (mask = 0x80; mask > 0; mask >>= 1) {
         if (*(bits++) == '1') {
             byte = byte | mask;
         }
