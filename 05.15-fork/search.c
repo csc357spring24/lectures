@@ -9,9 +9,51 @@
 int fsearch(char *, char *);
 
 int main(int argc, char *argv[]) {
-    int status = EXIT_FAILURE;
+    int status = EXIT_FAILURE, tmp, i;
+    pid_t child;
 
-    status = fsearch(argv[2], argv[1]);
+    for (i = 2; i < argc; i++) {
+
+        /* We call fork once, but it returns twice: both to the current
+         *  now-parent process and to the child. There is no guarantee
+         *  as to which process will be scheduled on the CPU first; if
+         *  there is anything we wish the parent to do before the child,
+         *  then those things should be done before calling fork. */
+
+        if ((child = fork()) == 0) {
+            printf("%ld is the child of %ld.\n", (long)getpid(), (long)getppid());
+            status = fsearch(argv[i], argv[1]);
+
+            /* Now that the call to fork is inside a loop, we MUST ensure that
+             *  the child exits rather than going around again and making
+             *  children of its own... */
+
+            printf("%ld is exiting with status %d.\n", (long)getpid(), status);
+            exit(status);
+        }
+        else {
+            printf("%ld is the parent of %ld.\n", (long)getpid(), (long)child);
+
+            /* We do eventually need to wait for this child, but we can't do
+             *  that here, otherwise the next child would not be able to start
+             *  until after this child finishes. */
+        }
+    }
+
+    for (i = 2; i < argc; i++) {
+        child = wait(&tmp);
+
+        if (WIFEXITED(tmp)) {
+            printf("%ld exited with status %d.\n", (long)child, WEXITSTATUS(tmp));
+
+            if (WEXITSTATUS(tmp) == EXIT_SUCCESS) {
+                status = EXIT_SUCCESS;
+            }
+        }
+        else {
+            printf("%ld terminated abnormally.\n", (long)child);
+        }
+    }
 
     return status;
 }
