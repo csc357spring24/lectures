@@ -14,13 +14,13 @@ void handler(int signum) {
 
 /* spork: Creates a new resource-limited process. */
 pid_t spork(time_t timeout) {
-    struct itimerval timer;
     struct sigaction action;
+    struct itimerval timer;
     struct rlimit limit;
 
     if ((child = fork()) == 0) {
-        /* Lower the child's soft and hard limits on the number of processes to
-         *  1, so that the child cannot create any children of its own. */
+        /* Lower the child's soft and hard limits on number of processes to 1,
+         *  so that it cannot create any more children of its own: */
         limit.rlim_cur = 1;
         limit.rlim_max = 1;
         setrlimit(RLIMIT_NPROC, &limit);
@@ -28,11 +28,9 @@ pid_t spork(time_t timeout) {
         return 0;
     }
     else {
-        /* The default action for SIGALRM is to terminate the process; if we want
-         *  to take some alternative action instead, we have to install a handler.
-         *  Note that this must be done before starting the timer, otherwise there
-         *  is theoretically a possibility that the timer could go off before the
-         *  handler is installed. */
+        /* Install a handler for SIGALRM -- note that this must be done before
+         *  starting the timer, otherwise there is a chance that the handler
+         *  is not installed until after the timer has elapsed: */
         action.sa_handler = handler;
         action.sa_flags = SA_RESTART;
         sigemptyset(&action.sa_mask);
@@ -42,19 +40,21 @@ pid_t spork(time_t timeout) {
         timer.it_value.tv_sec = timeout;
         timer.it_value.tv_usec = 0;
 
-        /* After that 1 second, reset the timer to do nothing: */
+        /* After sending that first SIGALRM, don't send any more: */
         timer.it_interval.tv_sec = 0;
         timer.it_interval.tv_usec = 0;
 
         setitimer(ITIMER_REAL, &timer, NULL);
 
         /* Using an infinite loop to "busy wait" for a signal is extremely poor
-         *  form; if we don't plan to do anything until a signal arrives, we should
-         *  instead "pause" so that the CPU can do other things.
+         *  form; if we don't plan to do anything until a signal arrives, we
+         *  should instead "pause" so that the CPU can do other things.
          *
          * while (1);
-         * 
-         * pause(); */
+         *
+         * pause();
+         */
+
         return child;
     }
 }
