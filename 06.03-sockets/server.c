@@ -6,6 +6,7 @@
 
 int main(int argc, char *argv[]) {
     struct addrinfo hints = {0}, *addr;
+    uint32_t ipaddr;
     int fd, client;
 
     /* This program, the server, will passively wait for new clients to attempt
@@ -28,11 +29,23 @@ int main(int argc, char *argv[]) {
     bind(fd, addr->ai_addr, addr->ai_addrlen);
     listen(fd, 1);
 
-    /* Instead of repurposing the existing socket, which is already bound and
-     *  listening for future connections, this creates a new socket dedicated
-     *  to communications with the client we just accepted. */
+    /* If we didn't care about the client's address, we could just pass NULL
+     *  as the second and third arguments when acceptint. */
 
-    client = accept(fd, NULL, NULL);
+    struct sockaddr_storage tmp;
+    socklen_t len = sizeof(struct sockaddr_storage);
+    client = accept(fd, (struct sockaddr *)&tmp, &len);
+    ipaddr = ntohl(((struct sockaddr_in *)&tmp)->sin_addr.s_addr);
+    printf("Accepted from %d.%d.%d.%d\n",
+     (ipaddr & 0xFF000000) >> 24,
+     (ipaddr & 0x00FF0000) >> 16,
+     (ipaddr & 0x0000FF00) >> 8,
+     (ipaddr & 0x000000FF) >> 0);
+
+    /* Instead of repurposing the existing socket, which is already bound and
+     *  listening for future connections, accepting a connection creates a new
+     *  socket dedicated to communications with that client. */
+
     char buf[5];
     int n;
 
