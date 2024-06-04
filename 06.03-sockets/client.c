@@ -7,8 +7,7 @@
 int main(int argc, char *argv[]) {
     struct addrinfo hints = {0}, *addr;
     uint32_t ipaddr;
-    int fd, i = 0;
-    char buf[14] = "Hello, world!";
+    int fd;
 
     /* This program, the client, will actively attempt to connect to the
      *  existing, already running server. In order to establish a connection,
@@ -23,7 +22,8 @@ int main(int argc, char *argv[]) {
     getaddrinfo(argv[1], argv[2], &hints, &addr);
     ipaddr = ntohl(((struct sockaddr_in *)addr->ai_addr)->sin_addr.s_addr);
 
-    /* In POSIX, all I/O is file I/O, and sockets are no exception. */
+    /* All I/O is file I/O, and sockets are no exception, just like the
+     *  terminal, actual files, and pipes. */
 
     fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     connect(fd, addr->ai_addr, addr->ai_addrlen);
 
-    printf("%d.%d.%d.%d\n",
+    printf("Connected to %d.%d.%d.%d\n",
      (ipaddr & 0xFF000000) >> 24,
      (ipaddr & 0x00FF0000) >> 16,
      (ipaddr & 0x0000FF00) >> 8,
@@ -43,9 +43,14 @@ int main(int argc, char *argv[]) {
      *  we're trying to send at once, in which case it is our responsibility
      *  to keep trying to send the remainder of the data. */
 
+    char buf[] = "Hello, world!";
+    int i = 0;
+
     while (i < 13) {
         i += write(fd, buf + i, 13 - i);
     }
+
+    printf("Sent \"%s\".\n", buf);
 
     close(fd);
     freeaddrinfo(addr);

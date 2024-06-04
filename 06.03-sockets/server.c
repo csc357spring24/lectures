@@ -6,8 +6,7 @@
 
 int main(int argc, char *argv[]) {
     struct addrinfo hints = {0}, *addr;
-    int fd, client, n;
-    char buf[5];
+    int fd, client;
 
     /* This program, the server, will passively wait for new clients to attempt
      *  to connect to it. In order to listen for new connections, we need to
@@ -18,23 +17,24 @@ int main(int argc, char *argv[]) {
     hints.ai_flags = AI_PASSIVE;
 
     /* For simplicity, we assume the first of our own addresses, populated by
-     *  the sockets library, will alwyas work. */
+     *  the sockets library, will always work. */
 
     getaddrinfo(NULL, argv[1], &hints, &addr);
     fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 
-    /* Unlike the client, the server plans to listen for new connections on a
-     *  specific port, so the socket must be "bound" to that port. */
+    /* If clients are to connect to us, they have to know what port we are
+     *  using, so our socket has to be "bound" to a known port. */
 
     bind(fd, addr->ai_addr, addr->ai_addrlen);
     listen(fd, 1);
 
-    /* The existing socket is already bound and listening for new connections;
-     *  accept creates a new socket for use with the newly connected client,
-     *  rather than repurposing the existing connection, in case we want to
-     *  accept additional clients later. */
+    /* Instead of repurposing the existing socket, which is already bound and
+     *  listening for future connections, this creates a new socket dedicated
+     *  to communications with the client we just accepted. */
 
     client = accept(fd, NULL, NULL);
+    char buf[5];
+    int n;
 
     while ((n = read(client, buf, 4)) > 0) {
         buf[n] = '\0';
