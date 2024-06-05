@@ -31,6 +31,9 @@ int main(int argc, char *argv[]) {
      (ipaddr & 0x0000FF00) >> 8,
      (ipaddr & 0x000000FF) >> 0);
 
+    /* The client will simply take whatever the user types, and send that
+     *  over to the server. */
+
     while ((n = read(STDIN_FILENO, buf, sizeof(char) * 4)) > 0) {
         int i = 0;
 
