@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
      (ipaddr & 0x0000FF00) >> 8,
      (ipaddr & 0x000000FF) >> 0);
 
-    while ((n = fread(buf, sizeof(char), 4, stdin)) > 0) {
+    while ((n = read(STDIN_FILENO, buf, sizeof(char) * 4)) > 0) {
         int i = 0;
 
         while (i < n) {

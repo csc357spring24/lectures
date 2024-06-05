@@ -36,12 +36,8 @@ int main(int argc, char *argv[]) {
      (ipaddr & 0x0000FF00) >> 8,
      (ipaddr & 0x000000FF) >> 0);
 
-    /* Instead of repurposing the existing socket, which is already bound and
-     *  listening for future connections, accepting a connection creates a new
-     *  socket dedicated to communications with that client. */
-
     while ((n = read(client, buf, 4)) > 0) {
-        fwrite(buf, sizeof(char), n, stdout);
+        write(STDOUT_FILENO, buf, sizeof(char) * n);
     }
 
     close(client);
