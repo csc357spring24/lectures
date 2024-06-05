@@ -11,8 +11,8 @@ extern int errno;
 
 int main(int argc, char *argv[]) {
     struct addrinfo hints = {0}, *addr;
-    int fd, n;
     struct pollfd clients[17];
+    int fd, n;
 
     /* This program, the server, will passively wait for new clients to attempt
      *  to connect to it. In order to listen for new connections, we need to
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     listen(fd, 16);
 
     /* To support up to 16 clients, we need to poll up to 17 sockets: the 16
-     *  sockets connected to our clients, and the original socket created to
+     *  sockets connected to our clients, and the 1 original socket created to
      *  listen for new connections. */
 
     clients[0].fd = fd;
@@ -39,18 +39,18 @@ int main(int argc, char *argv[]) {
     n = 1;
 
     while (poll(clients, n, n > 1 ? -1 : 10000) > 0) {
-
-        /* Since "poll" does not know if one file descriptor is more
-         *  important than any other, it only tells us how many were ready
-         *  for I/O; we have to search through the descriptors. */
         int i;
+
+        /* Since "poll" does not know if one descriptor is more important than
+         *  the rest, it just tells us how many are ready for I/O, and we can
+         *  then search for which exactly those are. */
 
         for (i = 0; i < n; i++) {
             if (clients[i].revents & POLLIN) {
                 if (clients[i].fd == fd) {
                     struct sockaddr_storage tmp;
                     socklen_t len = sizeof(struct sockaddr_storage);
-                    uint32_t ipaddr;
+                    uint32_t ip;
 
                     /* By making sockets connected to clients non-blocking,
                      *  if there is no data available to be read, the read will
@@ -61,12 +61,12 @@ int main(int argc, char *argv[]) {
                     clients[n].events = POLLIN;
                     n++;
 
-                    ipaddr = ntohl(((struct sockaddr_in *)&tmp)->sin_addr.s_addr);
+                    ip = ntohl(((struct sockaddr_in *)&tmp)->sin_addr.s_addr);
                     printf("Accepted from %d.%d.%d.%d\n",
-                     (ipaddr & 0xFF000000) >> 24,
-                     (ipaddr & 0x00FF0000) >> 16,
-                     (ipaddr & 0x0000FF00) >> 8,
-                     (ipaddr & 0x000000FF) >> 0);
+                     (ip & 0xFF000000) >> 24,
+                     (ip & 0x00FF0000) >> 16,
+                     (ip & 0x0000FF00) >> 8,
+                     (ip & 0x000000FF) >> 0);
                 }
                 else {
                     char buf[4];
@@ -74,15 +74,16 @@ int main(int argc, char *argv[]) {
 
                     /* Ordinarily, "read" is a blocking call -- if the client
                      *  has not sent any data but also has not closed its
-                     *  socket, then this will wait indefinitely. */
+                     *  socket, the OS will pause execution indefinitely. */
 
                     while ((m = read(clients[i].fd, buf, 4)) > 0) {
                         write(STDOUT_FILENO, buf, sizeof(char) * m);
                     }
 
-                    /* Only if the client has closed its socket or if something
-                     *  went wrong will we close our socket. Otherwise, there
-                     *  is could be more data in the future. */
+                    /* To break out of the loop, either the client has to close
+                     *  the connection or something has to go wrong. If there
+                     *  is simply no more data at the moment, we'll leave the
+                     *  connection open. */
 
                     if (m == 0 || errno != EAGAIN) {
                         close(clients[i].fd);

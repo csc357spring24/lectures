@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]) {
     struct addrinfo hints = {0}, *addr;
-    uint32_t ipaddr;
+    uint32_t ip;
     int fd, n;
     char buf[4];
 
@@ -24,15 +24,15 @@ int main(int argc, char *argv[]) {
     fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     connect(fd, addr->ai_addr, addr->ai_addrlen);
 
-    ipaddr = ntohl(((struct sockaddr_in *)addr->ai_addr)->sin_addr.s_addr);
+    ip = ntohl(((struct sockaddr_in *)addr->ai_addr)->sin_addr.s_addr);
     printf("Connected to %d.%d.%d.%d\n",
-     (ipaddr & 0xFF000000) >> 24,
-     (ipaddr & 0x00FF0000) >> 16,
-     (ipaddr & 0x0000FF00) >> 8,
-     (ipaddr & 0x000000FF) >> 0);
+     (ip & 0xFF000000) >> 24,
+     (ip & 0x00FF0000) >> 16,
+     (ip & 0x0000FF00) >> 8,
+     (ip & 0x000000FF) >> 0);
 
-    /* The client will simply take whatever the user types and send it out
-     *  over the socket. */
+    /* The client will simply take whatever the user types, and send that
+     *  over to the server via the socket. */
 
     while ((n = read(STDIN_FILENO, buf, sizeof(char) * 4)) > 0) {
         int i = 0;
